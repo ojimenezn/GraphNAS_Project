@@ -53,18 +53,16 @@ def build_args():
 if __name__ == "__main__":
     args = build_args()
     gnn_list = [
-        {'action': [0, 'gat_6', 0, 'gcn', 0, 'gcn', 2, 'arma', 'tanh', 'concat'], 'hyper_param': [0.01, 0.9, 0.0001, 64]},
-        {'action': [0, 'linear', 0, 'gat_6', 'linear', 'concat'], 'hyper_param': [0.005, 0.8, 1e-05, 128]},
-        {'action': [1, 'gat_8', 0, 'arma', 'tanh', 'add'], 'hyper_param': [0.01, 0.4, 5e-05, 64]}
+        {'action': [0, 'gcn', 2, 'sg', 'tanh', 'add'], 'hyper_param': [0.0005, 0.9, 0.0005, 256]}
     ]
 
-    dataset_list = ["Cora", "Citeseer", "Pubmed"]
+    dataset_list = ["Cora"]#, "Citeseer", "Pubmed"]
     for shuffle in [False, True]:
         for dataset, actions in zip(dataset_list, gnn_list):
             args.dataset = dataset
             manager = MicroCitationManager(args)
             test_scores_list = []
-            for i in range(100):
+            for i in range(20):
                 if shuffle:
                     manager.shuffle_data()
                 val_acc, test_acc = manager.evaluate(actions)

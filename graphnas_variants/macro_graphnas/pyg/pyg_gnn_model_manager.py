@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 import torch_geometric.transforms as T
-from torch_geometric.datasets import Planetoid, Coauthor, Amazon
+from torch_geometric.datasets import Planetoid, Coauthor, Amazon, FakeDataset
 
 from graphnas.gnn_model_manager import CitationGNNManager, evaluate
 from graphnas_variants.macro_graphnas.pyg.pyg_gnn import GraphNet
@@ -26,6 +26,8 @@ def load_data(dataset="Cora", supervised=False, full_data=True):
         dataset = Amazon(path, dataset, transform=T.NormalizeFeatures())
     elif dataset in ["Cora", "Citeseer", "Pubmed"]:
         dataset = Planetoid(path, dataset, transform=T.NormalizeFeatures())
+    elif dataset in ["FakeDataset"]:
+        dataset = FakeDataset(root = path, transform=T.NormalizeFeatures())
     data = dataset[0]
     if supervised:
         if full_data:

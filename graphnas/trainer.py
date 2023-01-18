@@ -316,7 +316,7 @@ class Trainer(object):
         results.sort(key=lambda x: x[-1], reverse=True)
         best_structure = ""
         best_score = 0
-        for actions in results[:20]:
+        for actions in results[:1]:
             actions = eval(actions[0])
             np.random.seed(123)
             torch.manual_seed(123)

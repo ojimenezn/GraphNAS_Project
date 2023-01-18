@@ -1,6 +1,8 @@
 import json
 from copy import deepcopy
 
+import matplotlib
+import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
@@ -15,7 +17,9 @@ class Analysis:
         if self.type == 'macro':
             self.df = self.return_df_macro()
         elif self.type == 'micro':
-            self.hp_list = ['Learning_Rate', 'Dropout', 'L2', 'Hidden_Layer_Size']
+            self.hp_list = ['Learning Rate', 'Dropout', 'L2', 'Hidden Layer Size']
+            self.act_list= [['in_1','in_2'],['f_1'],['Activation Function'], ['Aggregation Function']]
+            self.act_list_labels = ['Network Structure', 'Layer Types', 'Activation Function', 'Aggregation Function']
             self.df = self.return_df_micro()
         else:
             raise Exception("marco/micro")
@@ -30,7 +34,7 @@ class Analysis:
     def return_df_micro(self):
         f = self.read_file_micro()
         df = pd.DataFrame(f, columns=['actions', 'hyper_param', 'val'])
-        df[['in_1', 'f_1', 'in_2', 'f_2', 'act', 'agg']] = pd.DataFrame(df.actions.tolist(), index=df.index)
+        df[['in_1', 'f_1', 'in_2', 'f_2', 'Activation Function', 'Aggregation Function']] = pd.DataFrame(df.actions.tolist(), index=df.index)
         df[self.hp_list] = pd.DataFrame(df.hyper_param.tolist(),
                                                                                    index=df.index)
         return df
@@ -94,30 +98,62 @@ class Analysis:
         if self.type != 'micro':
             raise Exception("Sorry, wrong type")
 
-        figure, axis = plt.subplots(1, len(self.hp_list), figsize=(7, 4))
+        figure, axis = plt.subplots(2, 2, figsize=(8, 8))
         for i in range(len(self.hp_list)):
             A = self.analise_over_action(self.hp_list[i])
-            x = A.index
-            y = A['val']
+            x = A.index.array.to_numpy()
+            y = A['val'].array.to_numpy()
+            x_pos = np.arange(len(y))
 
-            x_pos = [i for i, _ in enumerate(x)]
+            a = int(i/2)
+            b = i%2
 
-            axis[i].bar(x_pos, y)
-            axis[i].set_ylabel("Validation Accuracy")
-            axis[i].set_xlabel(self.hp_list[i])
-            axis[i].set_ylim(0.45, 0.9)
-            #axis[i].set_title("Hyper Parameter Analysis over " + self.dataset + ' GraphNAS '+ self.type)
-            axis[i].set_xticklabels(x, fontdict=None, minor=False)
+            axis[a][b].bar(x_pos, y)
+            axis[a][b].set_ylabel("Validation Accuracy")
+            axis[a][b].set_xlabel(self.hp_list[i])
+            axis[a][b].set_ylim(0.45, 0.9)
+            axis[a][b].set_xticks(x_pos, labels=x, minor=False)
+            axis[a][b].tick_params(axis='both', which='major', labelsize=5)
+        figure.tight_layout()
 
-        for ax in figure.get_axes():
-            ax.label_outer()
-        figure.title("Hyper Parameter Analysis over " + self.dataset + ' GraphNAS '+ self.type)
-        plt.show()
+        name = self.dataset + "_" + self.type + '_hyperparam.jpg'
+        plt.savefig('../plots/'+name,dpi=150)
 
     def explore_micro_architectures(self):
         if self.type != 'micro':
             raise Exception("Sorry, wrong type")
 
+        figure, axis = plt.subplots(2, 2, figsize=(8, 8))
+        #print(self.df)
 
-cora_micro = Analysis('../Cora_microsub_manager_logger_file_1672948551.2461584.txt', dataset='Cora', type='micro', nr_layers = 2)
-cora_micro.explore_hyper_param()
+        for i in range(len(self.act_list)):
+            A = self.analise_over_combinations_of_actions(self.act_list[i])
+            if 'f_1' in self.act_list[i]:
+                A = A.sort_values('val', ascending=False).head(20)
+            if(len(self.act_list[i])>2):
+                x = []
+                codes = A.index.levels
+                for j in range(len(A.index.codes[0])):
+                    x.append(str(A.index.codes[0][j])+"/"+str(A.index.codes[1][j]))
+            else:
+                x = A.index.array.to_numpy()
+            y = A['val'].array.to_numpy()
+            x_pos = np.arange(len(y))
+
+            a = int(i/2)
+            b = i%2
+
+            axis[a][b].bar(x_pos, y)
+            axis[a][b].set_ylabel("Validation Accuracy")
+            axis[a][b].set_xlabel(self.act_list_labels[i])
+            axis[a][b].set_ylim(0.45, 0.9)
+            axis[a][b].set_xticks(x_pos, labels=x, minor=False)
+            axis[a][b].tick_params(axis='both', which='major', labelsize=5)
+        figure.tight_layout()
+
+        name = self.dataset + "_" + self.type + '_all_functions.jpg'
+        plt.savefig('../plots/' + name, dpi=150)
+
+
+cora_micro = Analysis('../Citeseer_microsub_manager_logger_file_1673002125.8153458.txt', dataset='Citeseer', type='micro', nr_layers = 2)
+cora_micro.explore_micro_architectures()
