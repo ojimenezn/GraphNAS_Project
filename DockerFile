@@ -1,12 +1,13 @@
-FROM python:3
+FROM python:3.8
 WORKDIR /GraphNAS
 COPY ./requirements.txt /GraphNAS
 
-RUN pip install torch==1.1.0
-RUN pip install dgl==0.3 scipy==1.1.0 numpy==1.15.4 hyperopt==0.1.2 scikit_learn==0.21.3 requests
+RUN pip install torch==1.13.1
+RUN pip install dgl==1.0.1 scipy==1.9.3 numpy==1.23.5 hyperopt==0.2.7 scikit_learn==1.2.0 requests
+RUN pip install certifi==2022.12.7 charset-normalizer==2.1.1 cloudpickle==2.2.0 future==0.18.2 idna==3.4 Jinja2==3.1.2 psutil==5.9.4 py4j==0.10.9.7 six==1.16.0 threadpoolctl==3.1.0 torch-spline-conv==1.2.1 tqdm==4.64.1 typing-extensions==4.4.0 urllib3==1.26.13 networkx==2.8.8 joblib==1.2.0
 
 # pytorch-geometric denpendencies
 RUN pip install --verbose --no-cache-dir torch-scatter
 RUN pip install --verbose --no-cache-dir torch-sparse
 RUN pip install --verbose --no-cache-dir torch-cluster
-RUN pip install torch-geometric
+RUN pip install torch-geometric==2.2.0
